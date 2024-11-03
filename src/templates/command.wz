@@ -1,0 +1,15 @@
+<?php
+
+namespace {namespace};
+
+use WildanMZaki\Wize\Command;
+
+class {name} extends Command
+{
+    protected $signature = '{command}';
+    protected $description = '{description}';
+
+    public function run()
+    {
+    }
+}

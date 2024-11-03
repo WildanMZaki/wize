@@ -1,0 +1,24 @@
+<?php
+
+define('BASE_PATH', __DIR__);
+define('WIZE_CONFIG', 'wize.config.json');
+
+require_once './vendor/autoload.php';
+
+$configs = [];
+$configFile = './' . WIZE_CONFIG;
+if (file_exists($configFile)) {
+    $configs = json_decode(file_get_contents($configFile), true);
+}
+
+$caller = basename(__FILE__);
+
+$console = new WildanMZaki\Wize\Console();
+$console->setConfig($configs);
+$console->setCaller($caller);
+
+$args = $argv;
+array_shift($args);
+$command = array_shift($args);
+
+$console->run($command ?? '', $args);

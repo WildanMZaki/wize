@@ -1,0 +1,11 @@
+{
+    "module": true,
+    "theme": "default",
+    ".env": true,
+    "database": {
+        "host": "localhost",
+        "username": "root",
+        "password": "",
+        "name": "myproject"
+    }
+}

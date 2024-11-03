@@ -1,0 +1,15 @@
+<?php
+
+namespace WildanMZaki\Wize\Commands;
+
+use WildanMZaki\Wize\Command;
+
+abstract class Db extends Command
+{
+    protected $signature = 'db';
+    protected $description = 'Base class for all db command';
+
+    public function run()
+    {
+    }
+}

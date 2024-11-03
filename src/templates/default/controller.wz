@@ -1,0 +1,19 @@
+<?php if (!defined('BASEPATH')) exit('No direct script access allowed');
+
+class {name} extends CI_Controller
+{
+	public $data;
+	
+	public function __construct()
+	{
+		parent::__construct();
+		$this->data['title'] = 'Title';
+		// Remove or use this
+		// $this->load->model('{possible_model_name}', '{lc_name}');
+	}
+
+	public function index()
+	{
+		$this->load->view('{module}/index', $this->data);
+	}
+}

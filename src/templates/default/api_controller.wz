@@ -1,0 +1,29 @@
+<?php defined('BASEPATH') or exit('No direct script access allowed');
+
+use chriskacerguis\RestServer\RestController;
+
+class {name} extends RestController {
+	public $user_id;
+
+	public function __construct() {
+		parent::__construct();
+		protectByKey();
+
+		$this->load->library('jwtauth');
+		$this->jwtauth->validate_token();
+		$this->user_id = $this->session->userdata('user_id');
+		$this->load->model('{possible_model_name}', '{lc_name}');
+	}
+
+
+	public function index_get() {
+		$uid = $this->user_id;
+
+		responseJSON([
+			'success' => true,
+			'data' => [
+				'uid' => $uid,
+			],
+		]);
+	}
+}

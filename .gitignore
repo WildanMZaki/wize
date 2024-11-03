@@ -1,0 +1,8 @@
+vendor
+bak
+wize.reference.php
+
+# testing purpose:
+/application
+/autoload.php
+/*.dev
