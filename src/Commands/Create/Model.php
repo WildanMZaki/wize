@@ -8,26 +8,47 @@ use WildanMZaki\Wize\Template;
 
 class Model extends Command
 {
+    protected $name;
+    protected $module;
+    protected $theme;
+
+    public function __construct($name = null, $options = [])
+    {
+        parent::__construct();
+
+        $defaults = [
+            'module' => null,
+            'theme' => 'default',
+        ];
+        $options = array_merge($defaults, $options);
+
+        $this->name = $name;
+        $this->module = $options['module'];
+        $this->theme = $options['theme'];
+    }
+
     protected $signature = 'create:model {name}
         {--module= : Specify module you want to use to create the model}
         {--theme=default : Theme is template you want to use for the model}
     ';
+
     protected $description = 'Help you create a model';
 
     public function run()
     {
-        $name = $this->argument('name');
+        $name = $this->name ?? $this->argument('name');
         if (!$name) {
             $name = $this->ask('What is your model name?');
         }
 
-
-        $module = $this->config('module');
-        if (!$module) {
+        $modularized = $this->config('module');
+        if (!$modularized) {
             $path = _models("$name.php");
             $module = $name;
         } else {
-            if ($this->option('module')) {
+            if ($this->module) {
+                $module = $this->module;
+            } else if ($this->option('module')) {
                 $module = $this->option('module');
             } else {
                 $nameParts = explode('/', $name);
@@ -48,7 +69,8 @@ class Model extends Command
             $this->end();
         }
 
-        $content = Template::theme($this->option('theme'))->replace([
+        $theme = $this->theme ?? $this->option('theme');
+        $content = Template::theme($theme)->replace([
             'name' => $name,
             'module' => strtolower($module),
         ])->get('model');

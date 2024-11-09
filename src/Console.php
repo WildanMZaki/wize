@@ -113,7 +113,6 @@ class Console
                 $directory .= "/{$this->pascalize($scope)}";
             }
         }
-        // echo $directory . PHP_EOL;
 
         // Load commands from the determined directory
         $this->loadCommands($directory);

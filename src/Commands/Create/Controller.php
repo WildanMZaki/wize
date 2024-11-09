@@ -8,27 +8,48 @@ use WildanMZaki\Wize\Template;
 
 class Controller extends Command
 {
+    protected $name;
+    protected $module;
+    protected $theme;
+
+    public function __construct($name = null, $options = [])
+    {
+        parent::__construct();
+
+        $defaults = [
+            'module' => null,
+            'theme' => 'default',
+        ];
+        $options = array_merge($defaults, $options);
+
+        $this->name = $name;
+        $this->module = $options['module'];
+        $this->theme = $options['theme'];
+    }
+
     protected $signature = 'create:controller {name}
         {--module= : Specify module you want to use to create controllers}
         {--theme=default : Theme is template you want to use}
+        {-m : Automatically create the related model}
     ';
 
     protected $description = 'Help you create a controller';
 
     public function run()
     {
-        $name = $this->argument('name');
+        $name = $this->name ?? $this->argument('name');
         if (!$name) {
             $name = $this->ask('What is your controller name?');
         }
 
-
-        $module = $this->config('module');
-        if (!$module) {
+        $modularized = $this->config('module');
+        if (!$modularized) {
             $path = _controllers("$name.php");
             $module = $name;
         } else {
-            if ($this->option('module')) {
+            if ($this->module) {
+                $module = $this->module;
+            } else if ($this->option('module')) {
                 $module = $this->option('module');
             } else {
                 $nameParts = explode('/', $name);
@@ -49,7 +70,8 @@ class Controller extends Command
             $this->end();
         }
 
-        $content = Template::theme($this->option('theme'))->replace([
+        $theme = $this->theme ?? $this->option('theme');
+        $content = Template::theme($theme)->replace([
             'name' => $name,
             'module' => strtolower($module),
         ])->get('controller');
@@ -58,6 +80,16 @@ class Controller extends Command
         $result = File::create($path, $content);
         if ($result !== false) {
             $this->success("Controller '$name' created successfully");
+
+            if ($this->option('m')) {
+                $possible_name = "M" . strtolower($name);
+                $model = new Model($possible_name, [
+                    'module' => $module,
+                    'theme' => $theme,
+                ]);
+                $model->setConfigs($this->configs);
+                $model->run();
+            }
             $this->end();
         }
     }
