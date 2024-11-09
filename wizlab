@@ -1,0 +1,3 @@
+<?php
+
+echo ltrim('.something.fad', '.');

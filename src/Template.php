@@ -43,7 +43,7 @@ class Template
 
     public static function ext(string $ext): self
     {
-        if (strpos($ext, '.') !== 0) throw new Exception('Extension must start with . (dot)');
+        $ext = "." . ltrim($ext, '.');
         self::$extension = $ext;
         return new self;
     }

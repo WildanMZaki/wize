@@ -18,7 +18,7 @@ class Library extends Command
             $name = $this->ask('What is your library name?');
         }
 
-        $name = $this->pascalize($name);
+        $name = $this->normalize($name);
 
         $path = _libraries("$name.php");
         if (File::exists($path)) {

@@ -51,6 +51,14 @@ trait Util
         return implode($glue, $words);
     }
 
+    public function normalize(string $word)
+    {
+        $word = preg_replace('/^\d+/', '', $word);
+        $word = preg_replace('/[^a-zA-Z0-9]+/', '_', $word);
+        return $word;
+    }
+
+
     public function ask($question = 'Am i handsome?', $default = null)
     {
         $q = $question . ($default ? " [$default]" : '');

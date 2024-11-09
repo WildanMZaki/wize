@@ -38,7 +38,7 @@ class Controller extends Command
                 }
             }
             if (!is_string($module)) {
-                $this->warning('Unknown Module');
+                $this->warning('Undefined Module');
                 $module = $this->ask('Which module do you want to use?');
             }
             $path = _moduleControllers($module, "$name.php");
