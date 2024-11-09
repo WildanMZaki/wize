@@ -90,7 +90,6 @@ class Controller extends Command
                 $model->setConfigs($this->configs);
                 $model->run();
             }
-            $this->end();
         }
     }
 }

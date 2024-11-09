@@ -79,7 +79,6 @@ class Model extends Command
         $result = File::create($path, $content);
         if ($result !== false) {
             $this->success("Model '$name' created successfully");
-            $this->end();
         }
     }
 }
