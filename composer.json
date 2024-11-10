@@ -1,25 +1,26 @@
 {
-  "name": "wildanmzaki/wize",
-  "description": "This is package php cli tool specialized for ci3",
-  "type": "library",
-  "require": {
-    "doctrine/inflector": "2.1.x-dev"
-  },
-  "license": "MIT",
-  "autoload": {
-    "psr-4": {
-      "WildanMZaki\\Wize\\": "src/"
+    "name": "wildanmzaki/wize",
+    "description": "This is package php cli tool specialized for ci3",
+    "type": "library",
+    "require": {
+        "doctrine/inflector": "2.1.x-dev"
     },
-    "files": [
-        "src/helpers/_paths.php"
-    ]
-  },
-  "authors": [
-    {
-      "name": "Wildan M Zaki",
-      "email": "wildanmzaki7@gmail.com"
-    }
-  ],
-  "minimum-stability": "dev",
-  "version": "dev-main"
+    "license": "MIT",
+    "autoload": {
+        "psr-4": {
+            "WildanMZaki\\Wize\\": "src/",
+            "WildanMZaki\\Wize\\Extend\\": "wize.custom"
+        },
+        "files": [
+            "src/helpers/_paths.php"
+        ]
+    },
+    "authors": [
+        {
+            "name": "Wildan M Zaki",
+            "email": "wildanmzaki7@gmail.com"
+        }
+    ],
+    "minimum-stability": "dev",
+    "version": "dev-main"
 }

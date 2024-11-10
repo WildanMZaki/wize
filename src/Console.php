@@ -10,7 +10,9 @@ class Console
     protected $commandClass = '';
 
     protected $configs = [];
-    protected $caller = 'wize';
+    protected string $caller = 'wize';
+
+    protected string $baseNamespace;
 
     public function __construct()
     {
@@ -39,16 +41,17 @@ class Console
                     }
                 }
             }
-        } else {
-            $this->danger("Can't find command class '{$this->commandClass}' in '{$this->scopesNamespace()}' scope namespace");
-            $this->end();
         }
+        // else {
+        //     $this->danger("Can't find command class '{$this->commandClass}' in '{$this->scopesNamespace()}' scope namespace");
+        //     $this->end();
+        // }
     }
 
     protected function getClassFromFile($file)
     {
         // Define the base namespace for commands
-        $baseNamespace = 'WildanMZaki\\Wize\\Commands';
+        $baseNamespace = $this->baseNamespace;
 
         // Determine the scope namespace
         $scopeNamespace = $this->scopesNamespace();
@@ -69,8 +72,6 @@ class Console
                 $result .= "\\{$this->pascalize($scope)}";
             }
         }
-        // echo 'Below scope namespace' . PHP_EOL;
-        // echo $result;
 
         return $result;
     }
@@ -84,7 +85,7 @@ class Console
     {
         $this->say('Available Commands:');
         foreach ($this->commands as $command) {
-            $cmd = $this->label($command->cmd(), 'blue');
+            $cmd = $this->colorize($command->cmd(), 'yellow');
             $this->say($cmd . " : " . $command->desc());
         }
         $this->end();
@@ -100,31 +101,48 @@ class Console
             $this->end();
         }
 
-        // Determine the directory to load commands from
-        $directory = __DIR__ . '/Commands';
-
         // Check if the command is scoped (e.g., create:helper, create:controller)
         $scopes = explode(':', $cmd);
         $this->commandClass = $this->pascalize(array_pop($scopes));
 
         $this->scopes = $scopes;
-        if (!empty($scopes)) {
-            foreach ($scopes as $scope) {
-                $directory .= "/{$this->pascalize($scope)}";
+
+        // Determine the sources to load commands from
+        $custom_commands = (BASE_PATH . '/' . $this->configs['extend'] . '/Commands');
+        $sources = [
+            (object) [
+                'namespace' => 'WildanMZaki\\Wize\\Extend\\Commands',
+                'directory' => $custom_commands,
+            ],
+            (object) [
+                'namespace' => 'WildanMZaki\\Wize\\Commands',
+                'directory' => (__DIR__ . '/Commands'), // Default Commands
+            ],
+        ];
+        // $directory = __DIR__ . '/Commands';
+        foreach ($sources as $source) {
+            $this->baseNamespace = $source->namespace;
+            $directory = $source->directory;
+
+            // Minimize the load command process by checking scoped command
+            if (!empty($scopes)) {
+                foreach ($scopes as $scope) {
+                    $directory .= "/{$this->pascalize($scope)}";
+                }
             }
-        }
 
-        // Load commands from the determined directory
-        $this->loadCommands($directory);
+            // Load commands from the determined directory
+            $this->loadCommands($directory);
 
-        // Execute the command
-        foreach ($this->commands as $command) {
-            if ($command->cmd() === $cmd) {
-                $command->setCaller($this->caller);
-                $command->setConfigs($this->configs);
-                $command->setArgsAndOptions($args);
-                $command->run();
-                return;
+            // Execute the command
+            foreach ($this->commands as $command) {
+                if ($command->cmd() === $cmd) {
+                    $command->setCaller($this->caller);
+                    $command->setConfigs($this->configs);
+                    $command->setArgsAndOptions($args);
+                    $command->run();
+                    return;
+                }
             }
         }
 

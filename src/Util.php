@@ -35,9 +35,9 @@ trait Util
         exit(0);
     }
 
-    public function ensureDirectory(string $path)
+    public function ensureDirectory(string $path, bool $useDirname = true)
     {
-        $directory = dirname($path);
+        $directory = $useDirname ? dirname($path) : $path;
         if (!is_dir($directory)) {
             mkdir($directory, 0777, true);
             $this->inform("$directory directory created");
@@ -64,11 +64,14 @@ trait Util
         $q = $question . ($default ? " [$default]" : '');
         $this->say($q, $this->ansiColors['green']);
         echo "> ";
-        $answer = $default;
         $answer = trim(fgets(STDIN));
-        if (!$answer && !$default) {
-            $this->danger("Operation canceled!");
-            $this->end();
+        if (!$answer) {
+            if (!$default) {
+                $this->danger("Operation canceled!");
+                $this->end();
+            } else {
+                $answer = $default;
+            }
         }
         $this->ln();
         return $answer;

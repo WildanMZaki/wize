@@ -1,8 +1,9 @@
 vendor
-bak
+*.bak
 wize.reference.php
 
 # testing purpose:
 /application
 /autoload.php
 /*.dev
+/wize.custom
