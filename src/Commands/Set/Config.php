@@ -4,7 +4,6 @@ namespace WildanMZaki\Wize\Commands\Set;
 
 use WildanMZaki\Wize\Command;
 use WildanMZaki\Wize\Config as WizeConfig;
-use WildanMZaki\Wize\File;
 
 class Config extends Command
 {
