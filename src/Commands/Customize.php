@@ -31,7 +31,11 @@ class Customize extends Command
         $this->ensureDirectory("$custom_directory/Commands", false);
         $this->ensureDirectory("$custom_directory/templates", false);
 
-        $confirm = $this->ask("This operation will make a small modification to your composer.json file to enable autoloading for custom commands. Do you want to proceed?", 'Y');
+        if ($this->option('y')) {
+            $confirm = 'y';
+        } else {
+            $confirm = $this->ask("This operation will make a small modification to your composer.json file to enable autoloading for custom commands. Do you want to proceed?", 'Y');
+        }
         if (strtolower($confirm) === 'y' || strtolower($confirm) === 'yes') {
             // Set up composer psr-4 autoload
             $composerFile = BASE_PATH . '/composer.json';
