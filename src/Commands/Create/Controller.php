@@ -47,6 +47,7 @@ class Controller extends Command
             $path = _controllers("$name.php");
             $module = $name;
         } else {
+            $module = null;
             if ($this->module) {
                 $module = $this->module;
             } else if ($this->option('module')) {
@@ -60,6 +61,7 @@ class Controller extends Command
             }
             if (!is_string($module)) {
                 $this->warning('Undefined Module');
+                $this->ln();
                 $module = $this->ask('Which module do you want to use?');
             }
             $path = _moduleControllers($module, "$name.php");
@@ -79,7 +81,7 @@ class Controller extends Command
         $this->ensureDirectory($path);
         $result = File::create($path, $content);
         if ($result !== false) {
-            $this->success("Controller '$name' created successfully");
+            $this->success("Controller [$path] created successfully");
 
             if ($this->option('m')) {
                 $possible_name = "M" . strtolower($name);

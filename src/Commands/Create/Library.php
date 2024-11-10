@@ -32,7 +32,7 @@ class Library extends Command
 
         $result = File::create($path, $content);
         if ($result !== false) {
-            $this->success("Library '$name' created successfully");
+            $this->success("Library [$path] created successfully");
             $this->end();
         }
     }

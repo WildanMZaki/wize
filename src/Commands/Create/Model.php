@@ -46,6 +46,7 @@ class Model extends Command
             $path = _models("$name.php");
             $module = $name;
         } else {
+            $module = null;
             if ($this->module) {
                 $module = $this->module;
             } else if ($this->option('module')) {
@@ -78,7 +79,7 @@ class Model extends Command
         $this->ensureDirectory($path);
         $result = File::create($path, $content);
         if ($result !== false) {
-            $this->success("Model '$name' created successfully");
+            $this->success("Model [$path] created successfully");
         }
     }
 }
