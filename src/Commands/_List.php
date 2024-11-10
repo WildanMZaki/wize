@@ -3,6 +3,7 @@
 namespace WildanMZaki\Wize\Commands;
 
 use WildanMZaki\Wize\Command;
+use WildanMZaki\Wize\CommandsLoader;
 
 class _List extends Command
 {
@@ -18,30 +19,54 @@ class _List extends Command
     public function run()
     {
         $scope = $this->argument('scope');
+
+        $sources = [
+            (object) [
+                'namespace' => 'WildanMZaki\\Wize\\Extend\\Commands',
+                'directory' => _rootz("{$this->config('extend')}/Commands"),
+                'origin' => _rootz("{$this->config('extend')}/Commands"),
+            ],
+            (object) [
+                'namespace' => 'WildanMZaki\\Wize\\Commands',
+                'directory' => __DIR__, // Default Commands
+                'origin' => __DIR__, // Default Commands
+            ],
+        ];
+
+        $scopeDir = null;
+        $message = "Listing all available commands:";
         if ($scope) {
             // List commands from the specific scope
             $scope = str_replace(':', '/', $scope);
             $scope = str_replace('\\', '/', $scope);
-            $scopeDir = __DIR__ . '/' . $this->pascalize($scope, '/', '/');
-            if (is_dir($scopeDir)) {
-                $this->inform("Listing commands for scope: $scope");
-                $this->loadCommands($scopeDir);
-                $this->listCommands();
-            } else {
-                $this->danger("Scope '$scope' does not exist.");
-                $this->end();
-            }
-        } else {
-            // List all commands
-            $this->inform('Listing all available commands:');
-            $this->loadCommands(__DIR__);
-            $this->listCommands();
+            $scopeDir = $this->pascalize($scope, '/', '/');
+            $message = "Listing commands for scope: $scope";
         }
+
+        $invalidDirs = [];
+        foreach ($sources as $source) {
+            if ($scopeDir) {
+                $source->directory .= "/$scopeDir";
+            }
+
+            if (!is_dir($source->directory)) {
+                // Menampung kalau terjadi invalid directory
+                $invalidDirs[] = $source->directory;
+            } else {
+                $this->loadCommands($source->directory, $source->namespace, $source->origin);
+            }
+        }
+        if (count($invalidDirs) == count($sources) && $scope) {
+            $this->danger("Scope '$scope' does not exist.");
+            $this->end();
+        }
+        $this->inform($message);
+        $this->listCommands();
     }
 
-    protected function loadCommands($directory)
+    protected function loadCommands($directory, $namespace, $origin)
     {
-        $current = __DIR__ . DIRECTORY_SEPARATOR;
+        $current = $origin . DIRECTORY_SEPARATOR;
         if (is_dir($directory)) {
             $iterator = new \RecursiveIteratorIterator(new \RecursiveDirectoryIterator($directory));
             foreach ($iterator as $file) {
@@ -53,7 +78,7 @@ class _List extends Command
                 array_pop($scopes);
                 $this->scopes = $scopes;
                 if ($file->isFile() && $file->getExtension() === 'php') {
-                    $class = $this->getClassFromFile($file->getPathname());
+                    $class = $this->getClassFromFile($file->getPathname(), $namespace);
                     if ($class && $this->isValidCommandClass($class)) {
                         $this->commands[] = new $class();
                     }
@@ -62,17 +87,14 @@ class _List extends Command
         }
     }
 
-    protected function getClassFromFile($file)
+    protected function getClassFromFile($file, $namespace)
     {
-        // Define the base namespace for commands
-        $baseNamespace = 'WildanMZaki\\Wize\\Commands';
-
         // Determine the scope namespace
         $scopeNamespace = $this->scopesNamespace();
 
         // Construct the fully qualified class name
         $class = basename($file, '.php');
-        $fullClassName = $baseNamespace . $scopeNamespace . '\\' . $class;
+        $fullClassName = $namespace . $scopeNamespace . '\\' . $class;
 
         // Check if the class exists
         return class_exists($fullClassName) ? $fullClassName : null;
@@ -113,6 +135,8 @@ class _List extends Command
         $scopped = [];
         $unscopped = [];
         $scannedScope = [];
+
+        sort($commands);
         foreach ($commands as [$command, $desc, $cmd]) {
             $item = str_pad($command, $max) . ($desc ? " : $desc" : "");
             $cmdParts = explode(':', $cmd);
@@ -131,6 +155,5 @@ class _List extends Command
         foreach (array_merge($unscopped, $scopped) as $item) {
             $this->say($item);
         }
-        $this->end();
     }
 }
