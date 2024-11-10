@@ -108,7 +108,7 @@ class Console
         $this->scopes = $scopes;
 
         // Determine the sources to load commands from
-        $custom_commands = (BASE_PATH . '/' . $this->configs['extend'] . '/Commands');
+        $custom_commands = _rootz("{$this->configs['extend']}/Commands");
         $sources = [
             (object) [
                 'namespace' => 'WildanMZaki\\Wize\\Extend\\Commands',

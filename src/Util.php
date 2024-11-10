@@ -129,4 +129,10 @@ trait Util
         }
         echo $color . $message . $this->ansiColors['reset'] . PHP_EOL;
     }
+
+    public function flash(string $message): void
+    {
+        echo "\r$message";
+        flush();
+    }
 }

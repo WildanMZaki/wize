@@ -6,4 +6,4 @@ wize.reference.php
 /application
 /autoload.php
 /*.dev
-/wize.custom
+/wize.extend

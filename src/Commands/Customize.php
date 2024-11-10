@@ -22,7 +22,7 @@ class Customize extends Command
             if ($default !== $folder_name) Config::set('extend', (string) $folder_name);
         }
 
-        $custom_directory = BASE_PATH . '/' . $folder_name;
+        $custom_directory = _rootz($folder_name);
         if (is_dir($custom_directory)) {
             $this->danger("Custom directory already exists: [$custom_directory]");
             $this->end();
@@ -34,11 +34,12 @@ class Customize extends Command
         if ($this->option('y')) {
             $confirm = 'y';
         } else {
+            $this->ln();
             $confirm = $this->ask("This operation will make a small modification to your composer.json file to enable autoloading for custom commands. Do you want to proceed?", 'Y');
         }
         if (strtolower($confirm) === 'y' || strtolower($confirm) === 'yes') {
             // Set up composer psr-4 autoload
-            $composerFile = BASE_PATH . '/composer.json';
+            $composerFile = _rootz('composer.json');
 
             // Check if composer.json exists
             if (!File::check($composerFile)) {
@@ -55,11 +56,40 @@ class Customize extends Command
             $composerConfig['autoload']['psr-4']['WildanMZaki\\Wize\\Extend\\'] = "$folder_name/";
             File::create($composerFile, json_encode($composerConfig, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES));
 
-            $this->say('Now in process of `composer dump-autoload` command');
-            // Run `composer dump-autoload` to apply changes
-            exec('composer dump-autoload');
+            // Show a timer during the `composer dump-autoload` process
+            $start = time();
 
-            $this->success('Customization setup done successfully');
+            // Execute composer dump-autoload with proc_open
+            $process = proc_open(
+                'composer dump-autoload',
+                [
+                    ['pipe', 'r'], // STDIN
+                    ['pipe', 'w'], // STDOUT
+                    ['pipe', 'w'], // STDERR
+                ],
+                $pipes
+            );
+
+            if (is_resource($process)) {
+                // Monitor the elapsed time while waiting for the command to complete
+                while (proc_get_status($process)['running']) {
+                    $elapsed = time() - $start;
+                    $this->flash("Running `composer dump-autoload`... (elapsed time: {$elapsed}s)");
+                    usleep(500000); // Update every half-second
+                }
+
+                // Close pipes and process
+                fclose($pipes[0]);
+                fclose($pipes[1]);
+                fclose($pipes[2]);
+                proc_close($process);
+
+                $this->ln();
+                $this->ln();
+                $this->success('Customization setup done successfully');
+            } else {
+                $this->danger('Failed to execute `composer dump-autoload`.');
+            }
         }
     }
 }

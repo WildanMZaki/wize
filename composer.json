@@ -9,7 +9,7 @@
     "autoload": {
         "psr-4": {
             "WildanMZaki\\Wize\\": "src/",
-            "WildanMZaki\\Wize\\Extend\\": "wize.custom"
+            "WildanMZaki\\Wize\\Extend\\": "wize.extend/"
         },
         "files": [
             "src/helpers/_paths.php"
