@@ -20,7 +20,9 @@ class Serve extends Command
         // Define the command to start PHP's built-in server
         $command = sprintf('php -S %s:%s index.php', escapeshellarg($host), escapeshellarg($port));
 
-        $this->inform("Starting server on http://$host:$port...");
+        $this->inform("Starting server on [http://$host:$port] ...");
+        $this->ln();
+
         passthru($command);
     }
 }
