@@ -1,12 +1,5 @@
 {
     "module": true,
     "theme": "default",
-    ".env": true,
-    "extend" : "wize.custom",
-    "database": {
-        "host": "localhost",
-        "username": "root",
-        "password": "",
-        "name": "myproject"
-    }
+    "extend" : "wize.extend"
 }
