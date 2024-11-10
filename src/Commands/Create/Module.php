@@ -17,7 +17,7 @@ class Module extends Command
     public function run()
     {
         if (!$this->config('module')) {
-            $this->danger('Your config say, that you are not using modularized codeigniter');
+            $this->danger('Your config seem not using modularized codeigniter');
             $this->end();
         }
         $name = $this->argument('name');
