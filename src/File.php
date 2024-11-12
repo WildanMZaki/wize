@@ -50,4 +50,12 @@ class File
 
         return file_put_contents($filename, $content);
     }
+
+    public static function delete(string $filename): bool
+    {
+        if (self::exists($filename)) {
+            return unlink($filename);
+        }
+        return false;
+    }
 }
