@@ -1,5 +1,12 @@
 {
+    "env": "development",
     "module": true,
     "theme": "default",
-    "extend": "wize.extend"
+    "extend": "wize.extend",
+    "paths": {
+        "root": "/",
+        "application": "application",
+        "system": "system",
+        "views": "views"
+    }
 }

@@ -2,6 +2,8 @@
 
 namespace WildanMZaki\Wize;
 
+use CI_Cli;
+
 abstract class Command
 {
     use Util;
@@ -34,10 +36,27 @@ abstract class Command
         $this->configs = [...$this->configs, ...$configs];
     }
 
+    // public function config(string $key): mixed
+    // {
+    //     return $this->configs[$key] ?? null;
+    // }
+
     public function config(string $key): mixed
     {
-        return $this->configs[$key] ?? null;
+        $keys = explode('.', $key);
+        $value = $this->configs;
+
+        foreach ($keys as $keyPart) {
+            if (is_array($value) && array_key_exists($keyPart, $value)) {
+                $value = $value[$keyPart];
+            } else {
+                return null;
+            }
+        }
+
+        return $value;
     }
+
 
     public function cmd(): string
     {
@@ -187,6 +206,26 @@ abstract class Command
             foreach ($options as [$opt, $desc]) {
                 $this->say(str_pad($opt, $max) . ($desc ? " : $desc" : ""));
             }
+        }
+    }
+
+    public function ci_instance()
+    {
+        try {
+            define('ENVIRONMENT', $this->config('env'));
+            define('FCPATH', _rootz($this->config('paths.root')));
+            define('APPPATH', _rootz($this->config('paths.application')) . DIRECTORY_SEPARATOR);
+            define('BASEPATH', _rootz($this->config('paths.system')) . DIRECTORY_SEPARATOR);
+
+            $views_path = rtrim($this->config('paths.views'), '/');
+            define('VIEWPATH', APPPATH . $views_path . DIRECTORY_SEPARATOR);
+
+            require_once __DIR__ . '/bootstrap.php';
+            $ci = new CI_Cli();
+            return $ci;
+        } catch (\Exception $er) {
+            $this->danger("Some error occure: {$er->getMessage()}");
+            $this->end();
         }
     }
 
