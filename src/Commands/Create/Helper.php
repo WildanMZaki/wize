@@ -51,7 +51,6 @@ class Helper extends Command
         $result = File::create($path, $content);
         if ($result !== false) {
             $this->success("Helper [$path] created successfully");
-            $this->end();
         }
     }
 }
