@@ -84,6 +84,7 @@ class Controller extends Command
             $this->success("Controller [$path] created successfully");
 
             if ($this->option('m')) {
+                $this->ln();
                 $possible_name = "M" . strtolower($name);
                 $model = new Model($possible_name, [
                     'module' => $module,
