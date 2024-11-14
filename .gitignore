@@ -4,6 +4,10 @@ wize.reference.php
 
 # testing purpose:
 /application
+/system
+/index.php
+/.env
+
 /autoload.php
 /*.dev
 /wize.extend
