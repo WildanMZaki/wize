@@ -1,3 +1,5 @@
 <?php
 
-echo ltrim('.something.fad', '.');
+require_once './vendor/autoload.php';
+
+\WildanMZaki\Wize\Facades\Wizely::call('dev:debug');
