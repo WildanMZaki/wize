@@ -7,6 +7,6 @@
         "root": "/",
         "application": "application",
         "system": "system",
-        "views": "views"
+        "views": "application/views"
     }
 }

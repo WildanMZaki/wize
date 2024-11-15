@@ -217,14 +217,14 @@ abstract class Command
             define('APPPATH', _rootz($this->config('paths.application')) . DIRECTORY_SEPARATOR);
             define('BASEPATH', _rootz($this->config('paths.system')) . DIRECTORY_SEPARATOR);
 
-            $views_path = rtrim($this->config('paths.views'), '/');
-            define('VIEWPATH', APPPATH . $views_path . DIRECTORY_SEPARATOR);
+            $views_path = str_replace('/', DIRECTORY_SEPARATOR, $this->config('paths.views'));
+            define('VIEWPATH', _rootz($views_path) . DIRECTORY_SEPARATOR);
 
             require_once __DIR__ . '/bootstrap.php';
             $ci = new CI_Cli();
             return $ci;
         } catch (\Exception $er) {
-            $this->danger("Some error occure: {$er->getMessage()}");
+            $this->danger($er->getMessage());
             $this->end();
         }
     }
