@@ -135,4 +135,43 @@ trait Util
         echo "\r$message";
         flush();
     }
+
+    public function unifyPath(string $path): string
+    {
+        return str_replace('/', DIRECTORY_SEPARATOR, $path);
+    }
+
+    public function justify(string $left, string $right, string $fillChar = '.'): void
+    {
+        $terminalWidth = (int)shell_exec('tput cols') ?: 80;
+
+        $visibleLeftLength = $this->stripAnsiLength($left);
+        $visibleRightLength = $this->stripAnsiLength($right);
+
+        // Calculate fill length
+        $fillLength = $terminalWidth - $visibleLeftLength - $visibleRightLength - 20; // -2 for spaces
+        $fillLength = max($fillLength, 0); // Ensure it's not negative
+
+        // Create the line with fill characters
+        $fill = str_repeat($fillChar, $fillLength);
+        echo "$left $fill $right" . PHP_EOL;
+    }
+
+    // Utility function to calculate visible length (excluding ANSI codes)
+    protected function stripAnsiLength(string $text): int
+    {
+        $ansiRegex = '/\033\[[0-9;]*m/';
+        return strlen(preg_replace($ansiRegex, '', $text));
+    }
+
+
+    public function percentage(int $current, int $total, int $decimals = 0): float
+    {
+        if ($total <= 0) {
+            return 0.0;
+        }
+
+        $percentage = ($current / $total) * 100;
+        return round($percentage, $decimals);
+    }
 }

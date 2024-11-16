@@ -38,9 +38,22 @@ class File
             self::$parsedToJSON = false;
             return json_decode($content, self::$associative);
         } else {
+            if (!$content) {
+                $content = '';
+            }
             return $content;
         }
     }
+
+    public static function lines(string $filename, int $flags = 0): array|false
+    {
+        if (!self::exists($filename)) {
+            return false;
+        }
+
+        return file($filename, $flags);
+    }
+
 
     public static function create(string $filename, $content)
     {

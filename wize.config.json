@@ -7,6 +7,10 @@
         "root": "/",
         "application": "application",
         "system": "system",
-        "views": "application/views"
+        "views": "application/views",
+        "database": "database"
+    },
+    "migration": {
+        "table": "ci_migrations"
     }
 }

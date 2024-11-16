@@ -4,6 +4,7 @@ wize.reference.php
 
 # testing purpose:
 /application
+/database
 /system
 /index.php
 /.env
