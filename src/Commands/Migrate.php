@@ -13,9 +13,7 @@ class Migrate extends Command
     ';
     protected $description = 'Import all .sql files in your database_path/migrations directory';
 
-    protected $ci;
     protected $conn;
-
     protected $migration_table;
 
     public function run()
@@ -27,7 +25,7 @@ class Migrate extends Command
             }
         }
 
-        $this->ci = $this->ci_instance();
+        $this->bootstrap_ci();
 
         $defaultConnection = $this->config('migration.connection') ?? 'default';
         $optionConnection = $this->option('conn');

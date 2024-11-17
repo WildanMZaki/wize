@@ -184,16 +184,16 @@ trait Util
 
     public function justify(string $left, string $right, string $fillChar = '.'): void
     {
-        $terminalWidth = (int)shell_exec('tput cols') ?: 80;
+        // $terminalWidth = (int)shell_exec('tput cols') ?: 80;
+        $terminalWidth = $this->getTerminalWidth();
 
         $visibleLeftLength = $this->stripAnsiLength($left);
         $visibleRightLength = $this->stripAnsiLength($right);
 
         // Calculate fill length
-        $fillLength = $terminalWidth - $visibleLeftLength - $visibleRightLength - 20; // -2 for spaces
-        $fillLength = max($fillLength, 0); // Ensure it's not negative
+        $fillLength = $terminalWidth - $visibleLeftLength - $visibleRightLength - 20; // -20 for spaces
+        $fillLength = max($fillLength, 0);
 
-        // Create the line with fill characters
         $fill = str_repeat($fillChar, $fillLength);
         echo "$left $fill $right" . PHP_EOL;
     }
@@ -205,6 +205,63 @@ trait Util
         return strlen(preg_replace($ansiRegex, '', $text));
     }
 
+    public function dynamicAction(string $message, callable $action, string $doneLabel = 'Done', string $loadingChar = '.', int $loadingSpeed = 100): void
+    {
+        $terminalWidth = $this->getTerminalWidth();
+        $visibleMessageLength = $this->stripAnsiLength($message);
+        $done = $this->label($doneLabel, 'blue');
+        $labelLength = $this->stripAnsiLength($done);
+
+        $loadingStart = $visibleMessageLength + 1;
+        $remainingSpace = max($terminalWidth - $loadingStart - $labelLength - 20, 0);
+
+        $loadingChars = str_repeat($loadingChar, $remainingSpace);
+
+        echo "\r$message "; // Display the message with a trailing space
+
+        $dots = '';
+        $startTime = microtime(true);
+
+        while (true) {
+            $dots .= $loadingChar;
+            if (strlen($dots) > $remainingSpace) {
+                $dots = str_repeat($loadingChar, $remainingSpace); // Prevent overflow
+            }
+
+            // Display the current state
+            echo "\r$message $dots";
+
+            try {
+                $action();
+                break; // Exit the loop if successful
+            } catch (\Exception $e) {
+                $failed = $this->label('Failed');
+                echo "\r$message $loadingChars $failed" . PHP_EOL;
+                throw $e;
+            }
+        }
+
+        // Finalize the display with the done label
+        $endTime = microtime(true);
+        $totalTime = round(($endTime - $startTime) * 1000, 0); // Measure time in ms
+        echo "\r$message $loadingChars $done" . PHP_EOL;
+    }
+
+    protected function getTerminalWidth(int $defaultWidth = 160): int
+    {
+        // Check if running on Windows
+        if (strncasecmp(PHP_OS, 'WIN', 3) === 0) {
+            return $defaultWidth;
+        }
+
+        // $width = (int)shell_exec('tput cols') ?: 80;
+        $width = @shell_exec('tput cols');
+        if (is_numeric($width)) {
+            return (int)$width; // Return the terminal width
+        }
+
+        return $defaultWidth;
+    }
 
     public function percentage(int $current, int $total, int $decimals = 0): float
     {

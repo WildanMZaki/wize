@@ -21,6 +21,9 @@ abstract class Command
     protected $argumentDescriptions = [];
     protected $optionDescriptions = [];
 
+    // Instance storage
+    protected $ci;
+
     public function __construct()
     {
         $this->parseSignature();
@@ -82,6 +85,14 @@ abstract class Command
     public function option(string $key): ?string
     {
         return $this->_options[$key] ?? null;
+    }
+
+    // Targetted to be refactored next update, required for make the code cleaner when need to call another command inside command
+    protected function prepareSubcommand(Command $command)
+    {
+        $command->setConfigs($this->configs);
+        $command->_options = $this->_options;
+        $command->ci = $this->ci;
     }
 
     protected function parseSignature()
@@ -209,20 +220,40 @@ abstract class Command
         }
     }
 
-    public function ci_instance()
+    public function bootstrap_ci()
     {
         try {
-            define('ENVIRONMENT', $this->config('env'));
-            define('FCPATH', _rootz($this->config('paths.root')));
-            define('APPPATH', _rootz($this->config('paths.application')) . DIRECTORY_SEPARATOR);
-            define('BASEPATH', _rootz($this->config('paths.system')) . DIRECTORY_SEPARATOR);
+            if (isset($this->ci) && $this->ci instanceof CI_Cli) {
+                return;
+            }
 
-            $views_path = str_replace('/', DIRECTORY_SEPARATOR, $this->config('paths.views'));
-            define('VIEWPATH', _rootz($views_path) . DIRECTORY_SEPARATOR);
+            if (!defined('ENVIRONMENT')) {
+                define('ENVIRONMENT', $this->config('env'));
+            }
 
-            require_once __DIR__ . '/bootstrap.php';
-            $ci = new CI_Cli();
-            return $ci;
+            if (!defined('FCPATH')) {
+                define('FCPATH', _rootz($this->config('paths.root')));
+            }
+
+            if (!defined('APPPATH')) {
+                define('APPPATH', _rootz($this->config('paths.application')) . DIRECTORY_SEPARATOR);
+            }
+
+            if (!defined('BASEPATH')) {
+                define('BASEPATH', _rootz($this->config('paths.system')) . DIRECTORY_SEPARATOR);
+            }
+
+            if (!defined('VIEWPATH')) {
+                $views_path = str_replace('/', DIRECTORY_SEPARATOR, $this->config('paths.views'));
+                define('VIEWPATH', _rootz($views_path) . DIRECTORY_SEPARATOR);
+            }
+
+            if (!defined('BOOTSTRAP')) {
+                define('BOOTSTRAP', true);
+                require_once __DIR__ . '/bootstrap.php';
+            }
+
+            $this->ci = new CI_Cli();
         } catch (\Exception $er) {
             $this->danger($er->getMessage());
             $this->end();
