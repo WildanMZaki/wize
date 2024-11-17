@@ -26,11 +26,7 @@ class Migrate extends Command
         }
 
         $this->bootstrap_ci();
-
-        $defaultConnection = $this->config('migration.connection') ?? 'default';
-        $optionConnection = $this->option('conn');
-
-        $connection = ($optionConnection && $optionConnection !== 'default') ? $optionConnection : $defaultConnection;
+        $connection = $this->getDBConnection();
 
         try {
             $this->conn = $this->ci->load->database($connection, TRUE);
@@ -125,6 +121,27 @@ class Migrate extends Command
             $this->inform('Nothing to migrate');
         }
     }
+
+    protected function getDBConnection()
+    {
+        global $argv;
+
+        $defaultConnection = $this->config('migration.connection') ?? 'default';
+        $optionConnection = $this->option('conn');
+
+        // Check if --conn exists explicitly in $argv
+        $isConnExplicit = false;
+        foreach ($argv as $arg) {
+            if (strpos($arg, '--conn=') === 0) {
+                $isConnExplicit = true;
+                break;
+            }
+        }
+
+        // Use the optionConnection if explicitly passed, otherwise fallback to the default
+        return ($isConnExplicit && $optionConnection) ? $optionConnection : $defaultConnection;
+    }
+
 
     protected function ensureMigrationsTable()
     {

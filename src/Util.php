@@ -263,6 +263,26 @@ trait Util
         return $defaultWidth;
     }
 
+    public function centerize(string|int|float $char, int $space, string $padChar = ' '): string
+    {
+        $charLength = strlen($char);
+
+        // Calculate total padding needed
+        $padding = $space - $charLength;
+
+        if ($padding <= 0) {
+            // If the space is less than or equal to the string length, return the string as is
+            return $char;
+        }
+
+        // Calculate left and right padding
+        $leftPadding = floor($padding / 2);
+        $rightPadding = ceil($padding / 2);
+
+        return str_repeat($padChar, $leftPadding) . $char . str_repeat($padChar, $rightPadding);
+    }
+
+
     public function percentage(int $current, int $total, int $decimals = 0): float
     {
         if ($total <= 0) {
