@@ -10,6 +10,7 @@ class Fresh extends Command
     protected $signature = 'migrate:fresh
         {--conn=default : Database connection that you want to choose}
         {-f : Force running in any environment}
+        {--clean : Clean all database and not automatically remigrating the migrations}
     ';
     protected $description = 'Fresh the database then running again the migration from the beginning';
 
@@ -27,11 +28,7 @@ class Fresh extends Command
         }
 
         $this->bootstrap_ci();
-
-        $defaultConnection = $this->config('migration.connection') ?? 'default';
-        $optionConnection = $this->option('conn');
-
-        $connection = ($optionConnection && $optionConnection !== 'default') ? $optionConnection : $defaultConnection;
+        $connection = $this->getDBConnection();
 
         try {
             $this->conn = $this->ci->load->database($connection, TRUE);
@@ -41,40 +38,68 @@ class Fresh extends Command
         }
 
         $this->migration_table = $this->config('migration.table');
-
-        $this->inform("Dropping all tables");
+        $clean = $this->option('clean');
 
         try {
             $this->conn->query('SET FOREIGN_KEY_CHECKS=0;');
             $tables = $this->conn->list_tables();
 
-            foreach ($tables as $table) {
-                if ($table === $this->migration_table) {
-                    continue;
+            if (!empty($tables)) {
+                $this->inform("Dropping all tables");
+
+                foreach ($tables as $table) {
+                    if ($table === $this->migration_table && !$clean) {
+                        continue;
+                    }
+
+                    // $this->justify("Dropping table: $table", '');
+                    // $this->conn->query("DROP TABLE IF EXISTS `$table`;");
+                    $this->dynamicAction("Dropping table: " . $this->colorize($table, 'yellow'), function () use ($table) {
+                        $this->conn->query("DROP TABLE IF EXISTS `$table`;");
+                    });
                 }
 
-                // $this->justify("Dropping table: $table", '');
-                // $this->conn->query("DROP TABLE IF EXISTS `$table`;");
-                $this->dynamicAction("Dropping table: $table", function () use ($table) {
-                    $this->conn->query("DROP TABLE IF EXISTS `$table`;");
-                });
+                // Re-enable foreign key checks
+                $this->conn->query('SET FOREIGN_KEY_CHECKS=1;');
+
+                if (!$clean) {
+                    // Truncate the migration table
+                    $this->conn->query("TRUNCATE TABLE `$this->migration_table`;");
+
+                    // Remigrate
+                    $this->ln();
+                    $migrate = new Migrate();
+                    $migrate->setConfigs($this->configs);
+                    $migrate->_options = $this->_options;
+                    $migrate->ci = $this->ci;
+                    $migrate->run();
+                    return;
+                }
+            } else {
+                $this->inform('No tables found');
             }
-
-            // Truncate the migration table
-            $this->conn->query("TRUNCATE TABLE `$this->migration_table`;");
-
-            // Re-enable foreign key checks
-            $this->conn->query('SET FOREIGN_KEY_CHECKS=1;');
-
-            $this->ln();
-            // Remigrate
-            $migrate = new Migrate();
-            $migrate->setConfigs($this->configs);
-            $migrate->_options = $this->_options;
-            $migrate->ci = $this->ci;
-            $migrate->run();
         } catch (\Exception $e) {
             $this->danger("Error refreshing database: " . $e->getMessage());
         }
+    }
+
+    protected function getDBConnection()
+    {
+        global $argv;
+
+        $defaultConnection = $this->config('migration.connection') ?? 'default';
+        $optionConnection = $this->option('conn');
+
+        // Check if --conn exists explicitly in $argv
+        $isConnExplicit = false;
+        foreach ($argv as $arg) {
+            if (strpos($arg, '--conn=') === 0) {
+                $isConnExplicit = true;
+                break;
+            }
+        }
+
+        // Use the optionConnection if explicitly passed, otherwise fallback to the default
+        return ($isConnExplicit && $optionConnection) ? $optionConnection : $defaultConnection;
     }
 }
