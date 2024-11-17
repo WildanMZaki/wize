@@ -1,5 +1,5 @@
 {
-    "env": "development",
+    "env": "production",
     "module": true,
     "theme": "default",
     "extend": "wize.extend",

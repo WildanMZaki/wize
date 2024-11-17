@@ -34,10 +34,10 @@ trait Util
         echo PHP_EOL;
     }
 
-    public function end()
+    public function end($code = 0)
     {
         $this->ln();
-        exit(0);
+        exit($code);
     }
 
     public function ensureDirectory(string $path, bool $useDirname = true)
@@ -82,6 +82,34 @@ trait Util
         return $answer;
     }
 
+    public function confirm(string $question, ?string $default = 'y'): bool
+    {
+        $default = strtolower($default);
+        if (!in_array($default, ['y', 'n'])) {
+            throw new \InvalidArgumentException("Default must be 'y' or 'n'.");
+        }
+
+        $defaultPrompt = $default === 'y' ? '[Y/n]' : '[y/N]';
+        $this->say("{$question} {$defaultPrompt}", $this->ansiColors['yellow']);
+        echo "> ";
+        $answer = trim(fgets(STDIN));
+
+        $answer = ($answer === '') ? $default : strtolower($answer);
+
+        if (in_array($answer, ['y', 'yes'])) {
+            return true; // Confirmed
+        } elseif (in_array($answer, ['n', 'no'])) {
+            return false; // Denied
+        }
+
+        // If input is invalid, re-prompt
+        $this->ln();
+        $this->danger("Invalid input. Please enter 'y' or 'n'.");
+        $this->ln();
+        return $this->confirm($question, $default); // Recursive call to re-prompt
+    }
+
+
     public function label($txt, $c = 'red')
     {
         return $this->ansiColors["bg_$c"] . " $txt " . $this->ansiColors['reset'];
@@ -118,7 +146,7 @@ trait Util
     public function debug($message = "Debugging..... hufft", $bgColored = true)
     {
         $color = $bgColored ? '' : $this->ansiColors['magenta'];
-        $message = !$bgColored ? "Error: $message" : ($this->label('Debug:') . " $message");
+        $message = !$bgColored ? "Error: $message" : ($this->label('Debug:', 'magenta') . " $message");
         $this->say($message, $color);
     }
 

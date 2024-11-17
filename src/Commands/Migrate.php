@@ -9,6 +9,7 @@ class Migrate extends Command
 {
     protected $signature = 'migrate
         {--conn=default : Database connection that you want to choose}
+        {-f : Force running in any environment}
     ';
     protected $description = 'Import all .sql files in your database_path/migrations directory';
 
@@ -19,6 +20,13 @@ class Migrate extends Command
 
     public function run()
     {
+        $env = $this->config('env');
+        if (strtolower($env) != 'development' && !$this->option('f')) {
+            if (!$this->confirm("You are not in a development environment. Do you want to proceed?", 'n')) {
+                return;
+            }
+        }
+
         $this->ci = $this->ci_instance();
 
         $defaultConnection = $this->config('migration.connection') ?? 'default';
