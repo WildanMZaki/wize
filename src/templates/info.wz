@@ -1,0 +1,17 @@
+   __     __
+  / /__  / /--____  ___
+ / // / / /--/_  / / _ \
+|  `/ |/ /  / / /_/  __/
+|__/|___/__/ /___/\___/
+
+
+Wize - \033[34mWizely enhances your CodeIgniter 3 development experience\033[0m
+
+Version: \033[33m{version}\033[0m
+Last Updated: \033[32m{last_update}\033[0m
+
+Visit: https://github.com/WildanMZaki/wize for more info!
+: {description}
+
+\033[33mUsage:\033[0m
+  php {caller} command [arguments] [options]

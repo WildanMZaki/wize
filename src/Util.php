@@ -177,6 +177,35 @@ trait Util
         flush();
     }
 
+    public function display(string $message, array $options = []): void
+    {
+        // Default options
+        $defaults = [
+            'color' => null,       // ANSI color for the text
+            'newline' => true,     // Add newline at the end
+            'raw' => false,        // If true, don't process ANSI escape codes
+        ];
+
+        // Merge options with defaults
+        $options = array_merge($defaults, $options);
+
+        // Process the message if raw is false
+        if (!$options['raw']) {
+            $message = str_replace('\033', "\033", $message);
+        }
+
+        // Apply color if provided
+        if (!is_null($options['color']) && isset($this->ansiColors[$options['color']])) {
+            $message = $this->ansiColors[$options['color']] . $message . $this->ansiColors['reset'];
+        }
+
+        echo $message;
+
+        if ($options['newline']) {
+            echo PHP_EOL;
+        }
+    }
+
     public function unifyPath(string $path): string
     {
         return str_replace('/', DIRECTORY_SEPARATOR, $path);
