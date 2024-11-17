@@ -15,13 +15,18 @@ trait Util
             'white' => "\033[97m",
             'red' => "\033[31m",
             'green' => "\033[32m",
-            'yellow' => "\033[33m",
             'blue' => "\033[34m",
+            'magenta' => "\033[35m",
+            'cyan' => "\033[36m",
+            'yellow' => "\033[33m",
+
+            'bg_white' => "\033[47m",
             'bg_red' => "\033[41m",
             'bg_green' => "\033[42m",
-            'bg_yellow' => "\033[43m",
             'bg_blue' => "\033[44m",
-            'bg_white' => "\033[47m",
+            'bg_magenta' => "\033[45m",
+            'bg_cyan' => "\033[46m",
+            'bg_yellow' => "\033[43m",
         ];
 
     public function ln()
@@ -110,6 +115,13 @@ trait Util
         $this->say($message, $color);
     }
 
+    public function debug($message = "Debugging..... hufft", $bgColored = true)
+    {
+        $color = $bgColored ? '' : $this->ansiColors['magenta'];
+        $message = !$bgColored ? "Error: $message" : ($this->label('Debug:') . " $message");
+        $this->say($message, $color);
+    }
+
     public function colorize($text, $color = null)
     {
         if (is_null($color)) {
@@ -124,7 +136,8 @@ trait Util
     public function say($message, $color = null)
     {
         if (is_null($color)) {
-            echo " $message" . PHP_EOL;
+            $startsWithColor = preg_match('/^\033\[[0-9;]*m/', $message);
+            echo ($startsWithColor ? '' : ' ') . $message . PHP_EOL;
             return;
         }
         echo $color . $message . $this->ansiColors['reset'] . PHP_EOL;

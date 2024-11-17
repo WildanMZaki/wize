@@ -11,6 +11,7 @@
         "database": "database"
     },
     "migration": {
+        "connection": "default",
         "table": "ci_migrations"
     }
 }

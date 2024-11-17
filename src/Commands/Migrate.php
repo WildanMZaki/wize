@@ -20,7 +20,12 @@ class Migrate extends Command
     public function run()
     {
         $this->ci = $this->ci_instance();
-        $connection = $this->option('conn') ?? 'default';
+
+        $defaultConnection = $this->config('migration.connection') ?? 'default';
+        $optionConnection = $this->option('conn');
+
+        $connection = ($optionConnection && $optionConnection !== 'default') ? $optionConnection : $defaultConnection;
+
         try {
             $this->conn = $this->ci->load->database($connection, TRUE);
         } catch (\Exception $e) {
@@ -37,7 +42,11 @@ class Migrate extends Command
             $this->end();
         }
 
-        $this->inform("Starting migrations from directory: [$directory]");
+        $this->say($this->colorize('Starting migrations:', 'blue'));
+        if ($connection != 'default') {
+            $this->say(($this->colorize('DB Conn:', 'green') . " `$connection`"));
+        }
+        $this->say(($this->colorize('DB Path:', 'green') . " $directory"));
 
         $this->ensureMigrationsTable();
 

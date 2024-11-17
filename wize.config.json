@@ -4,13 +4,14 @@
     "theme": "default",
     "extend": "wize.extend",
     "paths": {
-        "root": "/",
+        "root": "\/",
         "application": "application",
         "system": "system",
-        "views": "application/views",
+        "views": "application\/views",
         "database": "database"
     },
     "migration": {
+        "connection": "testing",
         "table": "ci_migrations"
     }
 }
