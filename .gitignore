@@ -4,6 +4,7 @@ wize.reference.php
 
 # testing purpose:
 /application
+/ci_sessions
 /database
 /system
 /index.php

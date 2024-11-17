@@ -7,18 +7,25 @@ use WildanMZaki\Wize\File;
 
 class Migrate extends Command
 {
-    protected $signature = 'migrate';
-    protected $description = 'Migrate tool for migrating all your .sql files inside your database_path/migrations directory';
+    protected $signature = 'migrate
+        {--conn=default : Database connection that you want to choose}
+    ';
+    protected $description = 'Import all .sql files in your database_path/migrations directory';
 
     protected $ci;
+    protected $conn;
+
     protected $migration_table;
 
     public function run()
     {
         $this->ci = $this->ci_instance();
-
-        if (!isset($this->ci->db)) {
-            $this->ci->load->database();
+        $connection = $this->option('conn') ?? 'default';
+        try {
+            $this->conn = $this->ci->load->database($connection, TRUE);
+        } catch (\Exception $e) {
+            $this->danger("Error loading database connection [$connection]: " . $e->getMessage());
+            $this->end();
         }
 
         $this->migration_table = $this->config('migration.table');
@@ -65,10 +72,10 @@ class Migrate extends Command
                 $this->ln();
                 $this->justify($filename, ("$total_queries " . ($total_queries > 1 ? 'queries' : 'query')));
 
-                $this->ci->db->trans_start();
+                $this->conn->trans_start();
 
                 foreach ($queries as $query) {
-                    $this->ci->db->query($query);
+                    $this->conn->query($query);
                     $executed++;
                     $percentage = $this->percentage($executed, $total_queries);
                     $remaining = $total_queries - $executed;
@@ -76,9 +83,9 @@ class Migrate extends Command
                 }
                 $this->flash('');
 
-                $this->ci->db->trans_complete();
+                $this->conn->trans_complete();
 
-                if ($this->ci->db->trans_status() === false) {
+                if ($this->conn->trans_status() === false) {
                     throw new \Exception("Migration failed for file: $filename");
                 }
 
@@ -106,8 +113,8 @@ class Migrate extends Command
 
     protected function ensureMigrationsTable()
     {
-        if (!$this->ci->db->table_exists($this->migration_table)) {
-            $this->ci->db->query("
+        if (!$this->conn->table_exists($this->migration_table)) {
+            $this->conn->query("
                 CREATE TABLE {$this->migration_table} (
                     id INT AUTO_INCREMENT PRIMARY KEY,
                     name VARCHAR(255) NOT NULL,
@@ -173,7 +180,7 @@ class Migrate extends Command
 
     protected function getExecutedMigrations()
     {
-        $query = $this->ci->db->select('name')->get($this->migration_table);
+        $query = $this->conn->select('name')->get($this->migration_table);
         $result = $query->result_array();
 
         return array_column($result, 'name');
@@ -181,7 +188,7 @@ class Migrate extends Command
 
     protected function getLatestBatch()
     {
-        $query = $this->ci->db->select_max('batch')->get($this->migration_table);
+        $query = $this->conn->select_max('batch')->get($this->migration_table);
         $result = $query->row();
 
         return $result->batch ?? 0;
@@ -189,7 +196,7 @@ class Migrate extends Command
 
     protected function recordMigration($filename, $batch)
     {
-        $this->ci->db->insert($this->migration_table, [
+        $this->conn->insert($this->migration_table, [
             'name' => $filename,
             'batch' => $batch,
         ]);

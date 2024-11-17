@@ -67,6 +67,9 @@ require_once(BASEPATH . 'core/compat/hash.php');
 require_once(BASEPATH . 'core/compat/password.php');
 require_once(BASEPATH . 'core/compat/standard.php');
 
+// Reset $_SERVER['argv'], as CLI arguments will be managed exclusively by the Wize package
+$_SERVER['argv'] = [];
+
 // Initialize core classes
 $UNI = &load_class('Utf8', 'core');         // UTF-8 Class
 $URI = &load_class('URI', 'core');          // URI Class
