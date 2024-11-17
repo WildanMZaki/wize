@@ -44,7 +44,7 @@ class Console
         if (!$cmd) {
             $this->danger('Command must be defined');
             $this->ln();
-            $this->say("Example: php {$this->caller} [command]");
+            $this->say("Example: php {$this->caller} [command] ..args --options=..");
             $this->end();
         }
 

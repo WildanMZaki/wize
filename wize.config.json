@@ -13,5 +13,6 @@
     "migration": {
         "connection": "default",
         "table": "ci_migrations"
-    }
+    },
+    "aliases": {}
 }

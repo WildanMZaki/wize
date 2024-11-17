@@ -21,4 +21,32 @@ $args = $argv;
 array_shift($args);
 $command = array_shift($args);
 
+$aliases = [
+    '-i' => 'info',
+    '--info' => 'info',
+    '-v' => 'version',
+    '--version' => 'version',
+    '-a' => 'author',
+    '--author' => 'author',
+    '-l' => 'list',
+];
+$aliases = array_merge($aliases, $configs['aliases'] ?? []);
+
+if (isset($aliases[$command])) {
+    $command = $aliases[$command];
+} else {
+    foreach ($aliases as $pattern => $replacement) {
+        // Handle wildcard patterns (contains *)
+        if (strpos($pattern, '*') !== false) {
+            $regex = '/^' . str_replace('\*', '.*', preg_quote($pattern, '/')) . '$/';
+
+            if (preg_match($regex, $command)) {
+                $commandSuffix = substr($command, strlen(rtrim($pattern, '*')));
+                $command = str_replace('*', $commandSuffix, $replacement);
+                break;
+            }
+        }
+    }
+}
+
 $console->run($command ?? '', $args);
