@@ -29,7 +29,7 @@ class Customize extends Command
         }
         $this->ensureDirectory($custom_directory, false);
         $this->ensureDirectory("$custom_directory/Commands", false);
-        $this->ensureDirectory("$custom_directory/templates", false);
+        // $this->ensureDirectory("$custom_directory/templates", false);
 
         if ($this->option('y')) {
             $confirm = 'y';
