@@ -276,17 +276,19 @@ trait Util
         echo "\r$message $loadingChars $done" . PHP_EOL;
     }
 
-    protected function getTerminalWidth(int $defaultWidth = 160): int
+    protected function getTerminalWidth(int $defaultWidth = 110): int
     {
         // Check if running on Windows
         if (strncasecmp(PHP_OS, 'WIN', 3) === 0) {
             return $defaultWidth;
         }
 
-        // $width = (int)shell_exec('tput cols') ?: 80;
-        $width = @shell_exec('tput cols');
-        if (is_numeric($width)) {
-            return (int)$width; // Return the terminal width
+        if (function_exists('shell_exec') && is_callable('shell_exec')) {
+            // $width = (int)shell_exec('tput cols') ?: $defaultWidt;
+            $width = @shell_exec('tput cols');
+            if (is_numeric($width)) {
+                return (int)$width; // Return the terminal width if valid
+            }
         }
 
         return $defaultWidth;

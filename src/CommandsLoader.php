@@ -29,15 +29,9 @@ trait CommandsLoader
 
     protected function getClassFromFile($file, $baseNamespace)
     {
-        // Determine scope-based namespace
         $scopeNamespace = $this->scopesNamespace();
-
-        // Generate the relative class name from file path
-        $relativePath = str_replace([__DIR__, '/', '.php'], ['', '\\', ''], $file);
-        $class = basename($relativePath);
-
-        // Combine base namespace, scope namespace, and class name
-        $fullClassName = $baseNamespace . $scopeNamespace . '\\' . $class;
+        $class = basename($file, '.php');
+        $fullClassName = '\\'. $baseNamespace . $scopeNamespace . "\\$class";
 
         return class_exists($fullClassName) ? $fullClassName : null;
     }
