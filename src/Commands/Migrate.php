@@ -58,8 +58,6 @@ class Migrate extends Command
             return;
         }
 
-        sort($files);
-
         $executedMigrations = $this->getExecutedMigrations();
         $batch = $this->getLatestBatch() + 1;
 
@@ -85,14 +83,17 @@ class Migrate extends Command
 
                 $this->conn->trans_start();
 
+                $flash_message = '';
                 foreach ($queries as $query) {
                     $this->conn->query($query);
                     $executed++;
                     $percentage = $this->percentage($executed, $total_queries);
                     $remaining = $total_queries - $executed;
-                    $this->flash(("Process: $percentage% with total $remaining remaining " . ($remaining > 1 ? 'queries' : 'query')));
+                    $flash_message = "Process: $percentage% with total $remaining remaining " . ($remaining > 1 ? 'queries' : 'query');
+                    $this->flash($flash_message);
                 }
-                $this->flash('');
+                $flash_message = '';
+                $this->flash($flash_message);
 
                 $this->conn->trans_complete();
 
@@ -107,7 +108,8 @@ class Migrate extends Command
                 $this->justify($this->label('DONE', 'blue') . ' Migrated successfully', $this->label(($total_ms . 'ms'), 'blue'));
                 $executed_migration++;
             } catch (\Exception $e) {
-                $this->justify($this->label('Failed', 'yellow'), '');
+                $this->flash('');
+                $this->justify($flash_message ,$this->label('Failed', 'yellow'));
                 $this->ln();
                 $this->danger($e->getMessage());
                 $this->end();
