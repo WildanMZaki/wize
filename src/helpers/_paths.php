@@ -4,7 +4,8 @@ if (!function_exists('_rootz')) {
     function _rootz(string $path = '')
     {
         $path = ltrim($path, '/');
-        return BASE_PATH . "/$path";
+        // return BASE_PATH . "/$path";
+        return str_replace('/', DIRECTORY_SEPARATOR, BASE_PATH . "/$path");
     }
 }
 
