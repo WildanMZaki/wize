@@ -17,7 +17,21 @@ class Command extends WizeCommand
     {
         $command = $this->argument('name');
         $extend_dir = $this->config('extend');
-        $path = BASE_PATH . '/' . $extend_dir . "/Commands";
+        $path = _rootz($extend_dir . "/Commands");
+        if (!is_dir($path)) {
+            $this->danger('No extend folder found!');
+            $this->ln();
+            $confirmed = $this->confirm('Continue with run `php ' . $this->caller . ' customize` first?');
+            if ($confirmed) {
+                $customizer = new \WildanMZaki\Wize\Commands\Customize();
+                $customizer->setConfigs($this->configs);
+                $customizer->run();
+                $this->ln();
+            } else {
+                $this->end();
+            }
+        }
+
         $command = str_replace('/', ':', $command);
         $command = str_replace('\\', ':', $command);
         $parts = explode(':', $command);
