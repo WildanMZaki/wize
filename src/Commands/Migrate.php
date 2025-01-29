@@ -109,7 +109,7 @@ class Migrate extends Command
                 $executed_migration++;
             } catch (\Exception $e) {
                 $this->flash('');
-                $this->justify($flash_message ,$this->label('Failed', 'yellow'));
+                $this->justify($flash_message, $this->label('Failed', 'yellow'));
                 $this->ln();
                 $this->danger($e->getMessage());
                 $this->end();
@@ -167,7 +167,21 @@ class Migrate extends Command
         }
 
         $files = glob("$directory*.sql");
-        sort($files); // Ensure consistent order
+        // sort($files); // Ensure consistent order
+        usort($files, function ($a, $b) {
+            $nameA = basename($a);
+            $nameB = basename($b);
+
+            if (str_starts_with($nameA, '_') && !str_starts_with($nameB, '_')) {
+                return -1;
+            }
+            if (!str_starts_with($nameA, '_') && str_starts_with($nameB, '_')) {
+                return 1;
+            }
+
+            // Default sorting (numerically)
+            return strcmp($nameA, $nameB);
+        });
         return $files;
     }
 

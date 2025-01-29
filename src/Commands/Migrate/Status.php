@@ -176,7 +176,13 @@ class Status extends Migrate
      */
     protected function getExecutionMigrations(): array
     {
-        $query = $this->conn->select('name, executed_at, batch')->get($this->migration_table);
+        try {
+            $query = $this->conn->select('name, executed_at, batch')->get($this->migration_table);
+        } catch (\Exception $e) {
+            $this->ln();
+            $this->danger($e->getMessage());
+            $this->end();
+        }
         $result = $query->result_array();
 
         $migrations = [];
