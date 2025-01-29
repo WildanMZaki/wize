@@ -17,10 +17,17 @@ class Serve extends Command
         $host = $this->option('host');
         $port = $this->option('port');
 
-        // Define the command to start PHP's built-in server
-        $command = sprintf('php -S %s:%s index.php', escapeshellarg($host), escapeshellarg($port));
+        $docRoot = rtrim(_rootz($this->config('paths.root')), DIRECTORY_SEPARATOR);
 
-        $this->inform("Starting server on [http://$host:$port] ...");
+        // Command to start PHP's built-in server
+        $command = sprintf(
+            'php -S %s:%s -t %s',
+            escapeshellarg($host),
+            escapeshellarg($port),
+            escapeshellarg($docRoot),
+        );
+
+        $this->inform("Starting server on [http://$host:$port]");
         $this->ln();
 
         passthru($command);
