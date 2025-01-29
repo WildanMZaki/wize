@@ -58,7 +58,7 @@ class File
     public static function create(string $filename, $content)
     {
         if (is_array($content) || is_object($content)) {
-            $content = json_encode($content, JSON_PRETTY_PRINT);
+            $content = json_encode($content, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES);
         }
 
         return file_put_contents($filename, $content);
